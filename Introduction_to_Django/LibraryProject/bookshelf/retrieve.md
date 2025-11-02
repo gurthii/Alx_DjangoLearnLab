@@ -4,11 +4,10 @@
 # To retrieve all created objects(books)
 
 ```py
-# Use the objects.all() method
-all_books = Book.objects.all()
+# Use the objects.get() method
+my_book = Book.objects.get(title="1984")
 
-for book in all_books:
-    print(book.title, book.author, book.publication_year)
+print(my_book.title, my_book.author, my_book.publication_year)
 
 # Returns all object instances as a QuerySet; iterable using a for loop and respective attributes such as .title, .author
 ```
