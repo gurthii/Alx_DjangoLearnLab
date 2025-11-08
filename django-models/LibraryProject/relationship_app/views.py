@@ -1,4 +1,4 @@
-from django.views.generic import DetailView
+from django.views.generic.detail import DetailView
 from .models import Library, Book
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
