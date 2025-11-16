@@ -1,13 +1,8 @@
-## Start by importing the respective model from app
-`from bookshelf.models import Book`
+all_books = Book.objects.get(title='1984')
+print(f'Title: {all_books[0].title}\nAuthor: {all_books[0].author}\npublication year: {all_books[0].publication_year}')
 
-# To retrieve all created objects(books)
-
-```py
-# Use the objects.get() method
-my_book = Book.objects.get(title="1984")
-
-print(my_book.title, my_book.author, my_book.publication_year)
-
-# Returns all object instances as a QuerySet; iterable using a for loop and respective attributes such as .title, .author
-```
+'''
+Title: 1984
+Author: George Orwell
+publication year: 1984
+'''

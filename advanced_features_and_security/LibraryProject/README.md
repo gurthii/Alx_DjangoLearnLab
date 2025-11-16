@@ -1,1 +1,1 @@
-# Library Project using Django
+First Django Project
