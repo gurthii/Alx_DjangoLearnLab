@@ -13,5 +13,24 @@ Permissions:
 - AllowAny for read operations.
 - IsAuthenticated for create, update, delete operations.
 
-All serializers perform validation, including custom rules such as enforcing
-valid publication years.
+All serializers perform validation, including custom rules such as enforcing valid publication years.
+
+# Query Features (Filtering, Searching, Ordering)
+
+The BookListView supports:
+
+### Filtering
+- /api/books/?title=1984
+- /api/books/?publication_year=1949
+- /api/books/?author=1
+
+### Searching
+- /api/books/?search=orwell
+- /api/books/?search=animal
+
+### Ordering
+- /api/books/?ordering=title
+- /api/books/?ordering=-publication_year
+
+The filtering is powered by django-filter,
+while searching and ordering use DRF’s SearchFilter and OrderingFilter.

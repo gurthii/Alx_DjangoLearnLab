@@ -1,5 +1,8 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
+
 from .models import Book
 from .serializers import BookSerializer
 
@@ -24,51 +27,38 @@ Customization:
   request handling.
 - Permission classes restrict write actions while keeping read operations open.
 """
+
 class BookListView(generics.ListAPIView):
     """
-    Retrieves all books.
-    Public (read-only) access.
+    Retrieves all books with advanced query capabilities.
+
+    Features:
+    - Filtering: filter by title, publication_year, and author.
+    - Searching: search text in title or author's name.
+    - Ordering: order results by title, publication_year, or id.
+
+    Examples:
+        /api/books/?title=1984
+        /api/books/?publication_year=1949
+        /api/books/?author=1
+        /api/books/?search=orwell
+        /api/books/?ordering=title
+        /api/books/?ordering=-publication_year
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
 
-class BookDetailView(generics.RetrieveAPIView):
-    """
-    Retrieves a single book by ID.
-    Public (read-only) access.
-    """
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    # Filtering fields
+    filterset_fields = ["title", "publication_year", "author"]
 
+    # Searching fields
+    search_fields = ["title", "author__name"]
 
-class BookCreateView(generics.CreateAPIView):
-    """
-    Creates a new book.
-    Requires authentication.
-    """
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAuthenticated]
+    # Ordering fields
+    ordering_fields = ["title", "publication_year", "id"]
 
-
-class BookUpdateView(generics.UpdateAPIView):
-    """
-    Updates an existing book.
-    Requires authentication.
-    """
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAuthenticated]
-
-
-class BookDeleteView(generics.DestroyAPIView):
-    """
-    Deletes a book.
-    Requires authentication.
-    """
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAuthenticated]
+    # Default ordering if none is provided
+    ordering = ["id"]
