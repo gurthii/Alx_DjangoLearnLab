@@ -1,5 +1,5 @@
 from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APITestCase
 from rest_framework import status
 from django.contrib.auth.models import User
 
@@ -8,9 +8,10 @@ from .models import Author, Book
 
 class BookAPITestCase(APITestCase):
     def setUp(self):
-        # Create test user and authenticate for protected endpoints
-        self.user = User.objects.create_user(username="testuser", password="testpass")
-        self.client = APIClient()
+        # Create test user and login credentials
+        self.username = "testuser"
+        self.password = "testpass"
+        self.user = User.objects.create_user(username=self.username, password=self.password)
 
         # Create an author and some books
         self.author = Author.objects.create(name="Test Author")
@@ -23,6 +24,10 @@ class BookAPITestCase(APITestCase):
         self.detail_url = lambda pk: reverse("book-detail", kwargs={"pk": pk})
         self.update_url = lambda pk: reverse("book-update", kwargs={"pk": pk})
         self.delete_url = lambda pk: reverse("book-delete", kwargs={"pk": pk})
+
+    def login(self):
+        login_successful = self.client.login(username=self.username, password=self.password)
+        self.assertTrue(login_successful, "Login failed in test setup")
 
     def test_list_books_public(self):
         # Anyone can GET list
@@ -46,21 +51,21 @@ class BookAPITestCase(APITestCase):
         response = self.client.post(self.create_url, data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-        # Authenticated should succeed
-        self.client.force_authenticate(user=self.user)
+        # Login user and retry
+        self.login()
         response = self.client.post(self.create_url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["title"], "New Book")
 
     def test_update_book_requires_auth(self):
-        update_data = {"title": "Updated Title"}
+        update_data = {"title": "Updated Title", "publication_year": 2005, "author": self.author.id}
 
         # Unauthenticated should fail
         response = self.client.put(self.update_url(self.book1.id), update_data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-        # Authenticated update
-        self.client.force_authenticate(user=self.user)
+        # Login and update
+        self.login()
         response = self.client.put(self.update_url(self.book1.id), update_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["title"], "Updated Title")
@@ -70,8 +75,8 @@ class BookAPITestCase(APITestCase):
         response = self.client.delete(self.delete_url(self.book1.id))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-        # Authenticated deletes
-        self.client.force_authenticate(user=self.user)
+        # Login and delete
+        self.login()
         response = self.client.delete(self.delete_url(self.book1.id))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Book.objects.filter(id=self.book1.id).exists())
