@@ -1,0 +1,32 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Add Comment - Django Blog{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <h2 style="margin-bottom: 1.5rem; color: #2c3e50;">Add a Comment</h2>
+    
+    <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem;">
+        <p><strong>Post:</strong> {{ post.title }}</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 1.5rem;">
+            {{ form.content.label_tag }}
+            {{ form.content }}
+            {% if form.content.errors %}
+                <div style="color: #721c24; font-size: 0.875rem; margin-top: 0.25rem;">
+                    {% for error in form.content.errors %}{{ error }}{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn">Post Comment</button>
+            <a href="{% url 'blog:viewing_post' post.pk %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

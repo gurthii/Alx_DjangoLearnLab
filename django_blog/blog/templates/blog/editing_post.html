@@ -1,0 +1,28 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Edit Post - Django Blog{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <h2 style="margin-bottom: 1.5rem; color: #2c3e50;">Edit Post</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 1.5rem;">
+            <label for="id_title" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Post Title</label>
+            <input type="text" name="title" id="id_title" value="{{ post.title }}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;" required>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label for="id_content" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Post Content</label>
+            <textarea name="content" id="id_content" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; min-height: 300px; font-family: inherit;" required>{{ post.content }}</textarea>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn">Save Changes</button>
+            <a href="{% url 'blog:viewing_post' post.id %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

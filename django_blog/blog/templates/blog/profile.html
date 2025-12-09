@@ -1,0 +1,40 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Profile - Django Blog{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <h2 style="margin-bottom: 1.5rem; color: #2c3e50;">User Profile</h2>
+    
+    <div style="border-bottom: 2px solid #ecf0f1; padding-bottom: 1rem; margin-bottom: 1rem;">
+        <p><strong>Username:</strong> {{ user.username }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>First Name:</strong> {{ user.first_name|default:"Not set" }}</p>
+        <p><strong>Last Name:</strong> {{ user.last_name|default:"Not set" }}</p>
+        <p><strong>Member Since:</strong> {{ user.date_joined|date:"F d, Y" }}</p>
+    </div>
+
+    <div style="margin-bottom: 1.5rem;">
+        <h3 style="color: #2c3e50; margin-bottom: 1rem;">Your Posts</h3>
+        {% if user.posts.all %}
+            <ul style="list-style: none;">
+                {% for post in user.posts.all %}
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid #ecf0f1;">
+                        <a href="{% url 'blog:post_detail' post.id %}" style="color: #3498db; text-decoration: none; font-weight: 500;">{{ post.title }}</a>
+                        <br>
+                        <small style="color: #666;">Published: {{ post.published_date|date:"F d, Y" }}</small>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p style="color: #666;">You haven't published any posts yet.</p>
+        {% endif %}
+    </div>
+
+    <div style="display: flex; gap: 1rem;">
+        <a href="{% url 'blog:edit_profile' %}" class="btn">Edit Profile</a>
+        <a href="{% url 'blog:create_post' %}" class="btn btn-secondary" style="background-color: #27ae60;"><span style="background-color: #27ae60;">Create New Post</span></a>
+        <a href="{% url 'blog:posts' %}" class="btn btn-secondary">View All Posts</a>
+    </div>
+</div>
+{% endblock %}

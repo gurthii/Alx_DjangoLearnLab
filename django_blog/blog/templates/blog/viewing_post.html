@@ -1,0 +1,91 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}{{ post.title }} - Django Blog{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <article style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h1 style="color: #2c3e50; margin-bottom: 0.5rem;">{{ post.title }}</h1>
+        <div style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem; border-bottom: 1px solid #ecf0f1; padding-bottom: 1rem;">
+            <small>By <strong>{{ post.author.get_full_name|default:post.author.username }}</strong> on {{ post.published_date|date:"F d, Y \a\t g:i A" }}</small>
+        </div>
+
+        <div style="color: #333; line-height: 1.8; margin-bottom: 2rem; font-size: 1.05rem;">
+            {{ post.content|linebreaks }}
+        </div>
+
+        <div style="border-top: 1px solid #ecf0f1; padding-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="{% url 'blog:posts' %}" class="btn btn-secondary">Back to Posts</a>
+            
+            {% if user.is_authenticated and user == post.author %}
+                <a href="{% url 'blog:editing_post' post.id %}" class="btn" style="background-color: #27ae60;">Edit</a>
+                <a href="{% url 'blog:deleting_post' post.id %}" class="btn btn-danger">Delete</a>
+            {% endif %}
+        </div>
+    </article>
+
+    <!-- Comments Section -->
+    <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h2 style="color: #2c3e50; margin-bottom: 1.5rem;">
+            Comments ({{ comments.count }})
+        </h2>
+
+        <!-- Add Comment Button/Form -->
+        {% if user.is_authenticated %}
+            <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 4px;">
+                <form method="post" action="{% url 'blog:add_comment' post.pk %}">
+                    {% csrf_token %}
+                    {{ comment_form.content }}
+                    <button type="submit" class="btn" style="margin-top: 1rem;">Post Comment</button>
+                </form>
+            </div>
+        {% else %}
+            <div style="margin-bottom: 2rem; padding: 1rem; background: #e7f3ff; border-radius: 4px; text-align: center;">
+                <p style="color: #004085; margin: 0;">
+                    <a href="{% url 'blog:login' %}" style="color: #0056b3; font-weight: 500;">Log in</a> to leave a comment
+                </p>
+            </div>
+        {% endif %}
+
+        <!-- Display Comments -->
+        {% if comments %}
+            {% for comment in comments %}
+                <div style="padding: 1.5rem; margin-bottom: 1rem; border: 1px solid #e9ecef; border-radius: 4px; {% if comment.author == post.author %}background: #fff3cd;{% endif %}">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                        <div>
+                            <strong style="color: #2c3e50;">{{ comment.author.username }}</strong>
+                            {% if comment.author == post.author %}
+                                <span style="background: #ffc107; color: #856404; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.75rem; margin-left: 0.5rem;">Author</span>
+                            {% endif %}
+                            <br>
+                            <small style="color: #666;">
+                                {{ comment.created_at|date:"F d, Y \a\t g:i A" }}
+                                {% if comment.created_at != comment.updated_at %}
+                                    <em>(edited)</em>
+                                {% endif %}
+                            </small>
+                        </div>
+                        
+                        {% if user.is_authenticated and user == comment.author %}
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="{% url 'blog:edit_comment' comment.pk %}" style="color: #3498db; text-decoration: none; font-size: 0.9rem;">Edit</a>
+                                <a href="{% url 'blog:delete_comment' comment.pk %}" style="color: #e74c3c; text-decoration: none; font-size: 0.9rem;">Delete</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <p style="color: #333; margin: 0; line-height: 1.6;">{{ comment.content }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #666; text-align: center; padding: 2rem;">No comments yet. Be the first to comment!</p>
+        {% endif %}
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+        <a href="{% url 'blog:listing_post' %}" style="color: #3498db; text-decoration: none;">← Back to all posts</a>
+    </div>
+
+
+</div>
+{% endblock %}
