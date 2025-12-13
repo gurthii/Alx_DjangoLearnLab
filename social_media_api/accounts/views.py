@@ -1,5 +1,3 @@
-# accounts/views.py
-
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -14,24 +12,15 @@ from .serializers import UserRegistrationSerializer, UserProfileSerializer
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserRegistrationSerializer
-    # Allow anyone to access the registration endpoint
-    permission_classes = (permissions.AllowAny,) 
+    permission_classes = (permissions.AllowAny,)
     
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         
-        # Manually create or retrieve the token upon successful registration
-        user = serializer.instance
-        token, created = Token.objects.get_or_create(user=user)
-        
-        headers = self.get_success_headers(serializer.data)
-        # The key deliverable: return the token
-        return Response({
-            'user': serializer.data, 
-            'token': token.key
-        }, status=status.HTTP_201_CREATED, headers=headers)
+        # The serializer instance now contains the 'token' field
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # 2. Login View (Token Retrieval)
 class LoginView(APIView):
