@@ -4,9 +4,13 @@ from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework import status
 from django.contrib.auth import authenticate
-
 from .models import CustomUser
 from .serializers import UserRegistrationSerializer, UserProfileSerializer
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+
+User = get_user_model()
 
 # 1. Registration View
 class RegisterView(generics.CreateAPIView):
@@ -51,3 +55,40 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         # The object is the currently logged-in user
         return self.request.user
+    
+# --- Follow/Unfollow Base View ---
+class FollowToggleView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+        # 1. Get the target user to follow/unfollow
+        target_user = get_object_or_404(User, id=user_id)
+        current_user = request.user
+
+        # 2. Check if the current user is trying to follow themselves
+        if current_user == target_user:
+            return Response({"detail": "You cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 3. Determine action based on the request path/logic (we'll make this a toggle)
+        is_following = current_user.following.filter(id=target_user.id).exists()
+        
+        if self.is_follow_action:
+            if not is_following:
+                current_user.following.add(target_user)
+                return Response({"detail": f"You are now following {target_user.username}."}, status=status.HTTP_200_OK)
+            else:
+                return Response({"detail": f"You already follow {target_user.username}."}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            if is_following:
+                current_user.following.remove(target_user)
+                return Response({"detail": f"You have unfollowed {target_user.username}."}, status=status.HTTP_200_OK)
+            else:
+                return Response({"detail": f"You are not following {target_user.username}."}, status=status.HTTP_400_BAD_REQUEST)
+
+# --- Concrete Follow View ---
+class FollowUserView(FollowToggleView):
+    is_follow_action = True
+
+# --- Concrete Unfollow View ---
+class UnfollowUserView(FollowToggleView):
+    is_follow_action = False

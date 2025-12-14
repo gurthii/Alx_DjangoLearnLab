@@ -1,11 +1,36 @@
 from rest_framework import viewsets, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
-
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
 from .permissions import IsAuthorOrReadOnly # Import the new permission class
+# posts/views.py (Add to the existing file)
 
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
+from .models import Post
+from .serializers import PostSerializer
+
+# --- Feed View ---
+class UserFeedView(ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # 1. Get the current logged-in user
+        user = self.request.user
+        
+        # 2. Get the IDs of all users the current user is following
+        # The 'following' ManyToMany field is used here.
+        followed_users_ids = user.following.values_list('id', flat=True)
+
+        # 3. Filter the Post queryset to only include posts whose author ID 
+        # is in the list of followed users' IDs.
+        queryset = Post.objects.filter(author__id__in=followed_users_ids)
+        
+        # 4. Order the posts by creation date (newest first, already done in Model Meta, but good practice here)
+        return queryset.order_by('-created_at')
+    
 # --- 1. Post ViewSet ---
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()

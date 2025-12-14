@@ -39,3 +39,20 @@ The custom user model extends Django's `AbstractUser` and includes the following
 * `bio`: A text field for a user biography.
 * `profile_picture`: An optional field for a profile image.
 * `followers`: A ManyToMany field that references itself, allowing users to track who follows them.
+
+# 👥 User Relationships and Feed
+
+## 🤝 Follow Management Endpoints (`/api/auth/`)
+
+These endpoints allow an authenticated user to manage their following list.
+
+| Method | Route | Description | Permissions |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/follow/<int:user_id>/` | Start following the user specified by `<user_id>`. | Authenticated |
+| `POST` | `/unfollow/<int:user_id>/` | Stop following the user specified by `<user_id>`. | Authenticated |
+
+## 📰 Content Feed Endpoint (`/api/v1/feed/`)
+
+| Method | Route | Description | Permissions |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/feed/` | Retrieves a paginated list of all posts from users that the current user follows, ordered by creation date (newest first). | Authenticated |

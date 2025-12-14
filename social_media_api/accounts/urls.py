@@ -1,13 +1,22 @@
+# accounts/urls.py
+
 from django.urls import path
-from .views import RegisterView, LoginView, UserProfileView
+# Make sure you import ALL the views you use:
+from .views import (
+    RegisterView, 
+    LoginView, 
+    UserProfileView, 
+    FollowUserView,  
+    UnfollowUserView 
+) 
 
 urlpatterns = [
-    # Registration endpoint (/api/auth/register)
+    # ... existing routes ...
     path('register/', RegisterView.as_view(), name='register'),
-    
-    # Login endpoint (/api/auth/login)
     path('login/', LoginView.as_view(), name='login'),
-    
-    # User profile management endpoint (/api/auth/profile)
     path('profile/', UserProfileView.as_view(), name='profile'),
+    
+    # NEW FOLLOW ROUTES
+    path('follow/<int:user_id>/', FollowUserView.as_view(), name='follow-user'),
+    path('unfollow/<int:user_id>/', UnfollowUserView.as_view(), name='unfollow-user'),
 ]
