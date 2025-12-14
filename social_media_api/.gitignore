@@ -1,0 +1,38 @@
+# ----------------------------------------------------------------------
+# 1. Bytecode and OS files
+# ----------------------------------------------------------------------
+*.pyc
+*~
+__pycache__
+.DS_Store
+.vscode/
+
+# ----------------------------------------------------------------------
+# 2. Environment and Secrets (CRITICAL)
+# ----------------------------------------------------------------------
+# This is where your SECRET_KEY, Database credentials, etc. reside
+.env
+.flaskenv
+venv/
+env/
+/local_settings.py  # If you use a separate local settings file
+
+# ----------------------------------------------------------------------
+# 3. Database
+# ----------------------------------------------------------------------
+# Never commit the SQLite file used for local development
+db.sqlite3
+
+# ----------------------------------------------------------------------
+# 4. Deployment and Static Files
+# ----------------------------------------------------------------------
+# Generated static files (collected by collectstatic)
+/staticfiles/
+# Temporary media files (uploaded content)
+/media/
+
+# Gunicorn PID files (if you use it locally)
+gunicorn.pid
+
+# Render/Heroku specific artifacts
+.cache
