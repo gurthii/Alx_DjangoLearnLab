@@ -56,3 +56,6 @@ These endpoints allow an authenticated user to manage their following list.
 | Method | Route | Description | Permissions |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/feed/` | Retrieves a paginated list of all posts from users that the current user follows, ordered by creation date (newest first). | Authenticated |
+
+## Deployed
+Project is live on - [PythonAnywhere.com/](https://appsbyjoe.pythonanywhere.com/)
