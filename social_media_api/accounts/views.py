@@ -62,9 +62,10 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         return self.request.user
     
 # --- Follow/Unfollow Base View ---
-class FollowToggleView(APIView):
+class FollowToggleView(generics.GenericAPIView): 
     permission_classes = [IsAuthenticated]
 
+    # The logic remains the same, as GenericAPIView allows defining methods like post()
     def post(self, request, user_id):
         # 1. Get the target user to follow/unfollow
         target_user = get_object_or_404(User, id=user_id)
