@@ -1,14 +1,19 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
-from rest_framework import status
-from django.contrib.auth import authenticate
+from rest_framework.permissions import IsAuthenticated
+
+from django.contrib.auth import authenticate, get_user_model
+from django.shortcuts import get_object_or_404
+
+# Assuming these are from your project, keep them
 from .models import CustomUser
 from .serializers import UserRegistrationSerializer, UserProfileSerializer
-from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
+
+# Other imports you might have (e.g., from .models, .serializers)
+from .models import CustomUser
+from .serializers import UserRegistrationSerializer, UserProfileSerializer
 
 User = get_user_model()
 
