@@ -5,7 +5,6 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
 from django.shortcuts import get_object_or_404
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
@@ -65,21 +64,18 @@ class CommentViewSet(viewsets.ModelViewSet):
         # The Post ID will be passed in the request data, which the serializer handles.
         serializer.save(author=self.request.user)
 
-# --- Like/Unlike View ---
-class PostLikeToggleView(APIView):
+# --- 1. Like View ---
+class PostLikeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
         post = generics.get_object_or_404(Post, pk=pk)
-        # Note: We still need the ContentType import at the top of the file
         
-        # THIS IS THE CRITICAL LINE CHANGE: Use request.user directly
-        like_instance, created = Like.objects.get_or_create(user=request.user, post=post) 
+        # Try to get or create the Like
+        like_instance, created = Like.objects.get_or_create(user=request.user, post=post)
         
         if created:
-            # New Like created (Liked the post)
-            
-            # Ensure ContentType is imported for this to work
+            # NOTIFICATION: Notify the post author
             if request.user != post.author:
                 Notification.objects.create(
                     actor=request.user,
@@ -91,6 +87,22 @@ class PostLikeToggleView(APIView):
                 )
             return Response({"detail": "Post liked."}, status=status.HTTP_201_CREATED)
         else:
-            # Like already existed (Unlike the post)
-            like_instance.delete()
+            # Already liked
+            return Response({"detail": "Post already liked."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# --- 2. Unlike View ---
+class PostUnlikeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        post = generics.get_object_or_404(Post, pk=pk)
+        
+        # Try to delete the Like
+        deleted_count, _ = Like.objects.filter(user=request.user, post=post).delete()
+        
+        if deleted_count > 0:
             return Response({"detail": "Post unliked."}, status=status.HTTP_200_OK)
+        else:
+            # Was not liked previously
+            return Response({"detail": "Post was not liked."}, status=status.HTTP_400_BAD_REQUEST)
