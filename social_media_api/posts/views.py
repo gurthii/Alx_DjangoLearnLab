@@ -69,20 +69,19 @@ class PostLikeToggleView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        # [1] Checker Requirement: Use generics.get_object_or_404(Post, pk=pk)
         post = get_object_or_404(Post, pk=pk)
-        user = request.user
+        # Note: We still need the ContentType import at the top of the file
         
-        # [2] Checker Requirement: Use Like.objects.get_or_create(...)
-        like_instance, created = Like.objects.get_or_create(user=user, post=post)
+        # THIS IS THE CRITICAL LINE CHANGE: Use request.user directly
+        like_instance, created = Like.objects.get_or_create(user=request.user, post=post) 
         
         if created:
             # New Like created (Liked the post)
             
-            # [3] Checker Requirement: Use Notification.objects.create (and avoid self-notification)
-            if user != post.author:
+            # Ensure ContentType is imported for this to work
+            if request.user != post.author:
                 Notification.objects.create(
-                    actor=user,
+                    actor=request.user,
                     recipient=post.author,
                     verb="liked",
                     content_type=ContentType.objects.get_for_model(post),
