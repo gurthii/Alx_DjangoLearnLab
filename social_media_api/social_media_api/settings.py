@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     
     # my apps
     'accounts',
+    'posts',
 
     # third-party apps
     'rest_framework',
@@ -138,5 +139,12 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         # This is the default setting that restricts everything unless overridden
         'rest_framework.permissions.AllowAny', 
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10, # Set default page size to 10 items
+    
+    # Register filtering and search backends
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
     ]
 }
