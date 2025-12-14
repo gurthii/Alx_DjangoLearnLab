@@ -13,6 +13,7 @@ services:
     name: socialmedia-api
     env: python
     
+    rootDir: social_media_api
     # 2a. Build Command: Runs once during deployment
     buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
     
