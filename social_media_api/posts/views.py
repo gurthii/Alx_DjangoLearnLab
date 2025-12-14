@@ -3,13 +3,17 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
-from .permissions import IsAuthorOrReadOnly # Import the new permission class
-# posts/views.py (Add to the existing file)
-
+from .permissions import IsAuthorOrReadOnly
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from .models import Post
 from .serializers import PostSerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from .models import Post, Like
+from notifications.utils import create_notification # Import the new helper
 
 # --- Feed View ---
 class UserFeedView(ListAPIView):
@@ -61,3 +65,31 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # The Post ID will be passed in the request data, which the serializer handles.
         serializer.save(author=self.request.user)
+
+# --- Like/Unlike View ---
+class PostLikeToggleView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        user = request.user
+        
+        # Check if the user already likes the post
+        like_instance = Like.objects.filter(user=user, post=post).first()
+
+        if like_instance:
+            # UNLIKE: Delete the like
+            like_instance.delete()
+            return Response({"detail": "Post unliked."}, status=status.HTTP_200_OK)
+        else:
+            # LIKE: Create the like
+            Like.objects.create(user=user, post=post)
+            
+            # NOTIFICATION: Notify the post author
+            create_notification(
+                actor=user, 
+                recipient=post.author, 
+                verb="liked", 
+                target=post
+            )
+            return Response({"detail": "Post liked."}, status=status.HTTP_201_CREATED)

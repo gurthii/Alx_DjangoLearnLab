@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import PostViewSet, CommentViewSet, UserFeedView
+from .views import PostLikeToggleView
 
 # Create a router for the PostViewSet
 router = DefaultRouter()
@@ -20,4 +21,5 @@ urlpatterns = [
     # Accessible via /api/v1/comments/
     path('', include(comment_router.urls)),
     path('feed/', UserFeedView.as_view(), name='user-feed'),
+    path('posts/<int:pk>/like/', PostLikeToggleView.as_view(), name='post-like-toggle'),
 ]

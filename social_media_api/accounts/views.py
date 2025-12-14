@@ -3,17 +3,15 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-
 from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
-
 # Assuming these are from your project, keep them
 from .models import CustomUser
 from .serializers import UserRegistrationSerializer, UserProfileSerializer
-
 # Other imports you might have (e.g., from .models, .serializers)
 from .models import CustomUser
 from .serializers import UserRegistrationSerializer, UserProfileSerializer
+from notifications.utils import create_notification
 
 User = get_user_model()
 
@@ -98,3 +96,24 @@ class FollowUserView(FollowToggleView):
 # --- Concrete Unfollow View ---
 class UnfollowUserView(FollowToggleView):
     is_follow_action = False
+
+from notifications.utils import create_notification # <--- ADD THIS IMPORT
+
+# --- Concrete Follow View ---
+class FollowUserView(FollowToggleView):
+    is_follow_action = True
+    
+    def post(self, request, user_id):
+        response = super().post(request, user_id)
+        
+        # Check if the follow was successful (Status 200 means success)
+        if response.status_code == status.HTTP_200_OK and "now following" in response.data.get('detail', ''):
+            target_user = get_object_or_404(User, id=user_id)
+            # NOTIFICATION: Notify the target user (recipient) of the new follower (actor)
+            create_notification(
+                actor=request.user, 
+                recipient=target_user, 
+                verb="followed", 
+                target=request.user # The target is the actor's user object
+            )
+        return response
